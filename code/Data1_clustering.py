@@ -129,7 +129,7 @@ df_all, km = split_df(5, df_nor, KMeans, 'KMeans')
 # df_all, km = split_df(5, df_nor, KMedoids, 'KMedoids')
 
 # Save df with label
-df.to_excel('/Users/mingyupark/spyder/seoultech_policy_project'+
+df.to_excel('/Users/mingyupark/spyder/plc_grad'+
         '/data/output/통합kmeans.xlsx') # or kmedoids
 
 # 6. Make comparison dataframe
@@ -168,7 +168,7 @@ def comp(bina, nume, dfs, name):
 
         final_df = pd.concat([final_df, df_v_all], axis=0)
 
-    final_df.to_csv('/Users/mingyupark/spyder/seoultech_policy_project'+
+    final_df.to_csv('/Users/mingyupark/spyder/plc_grad'+
             '/data/output/count_{0}_{1}.csv'.format(len(dfs) ,name), encoding='euc-kr')
     numerical = ['학부평균성적', '직전2학기평균', '성적오름추세', '직전2학기증가율']
 
@@ -184,7 +184,7 @@ def comp(bina, nume, dfs, name):
         
         final_df_n = pd.concat([final_df_n, df_v_all])
 
-    final_df_n.to_csv('/Users/mingyupark/spyder/seoultech_policy_project'+
+    final_df_n.to_csv('/Users/mingyupark/spyder/plc_grad'+
             '/data/output/numerical_{0}_{1}.csv'.format(len(dfs), name), encoding='euc-kr')
 
 
