@@ -1,7 +1,7 @@
 # seoultech_policy_project
 
 ## The objective of the project
-This project is for an analysis of why undergraduate students apply to graduate school.
+This project is for an analysis of why undergraduate students apply to graduate school. <br>
 The project will help university managers to have insights for promoting admission.
 
 ## Analysis goal by data
