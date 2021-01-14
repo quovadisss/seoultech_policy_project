@@ -16,4 +16,5 @@ The project will help university managers to have insights for promoting admissi
   - Look at the feature importances from X
 
 
-
+### Alerts
+- I uploaded only code and some outputs like plots because all of the data is confidential.
