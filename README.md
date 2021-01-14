@@ -17,4 +17,4 @@ The project will help university managers to have insights for promoting admissi
 
 
 ### Alerts
-- I uploaded only code and some outputs like plots because all of the data is confidential.
+- I uploaded only codes and some outputs like plots because all of the data is confidential.
