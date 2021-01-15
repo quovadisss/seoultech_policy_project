@@ -17,6 +17,7 @@ from matplotlib import cm
 from sklearn.preprocessing import MinMaxScaler
 from sklearn_extra.cluster import KMedoids
 from sklearn.manifold import TSNE
+import pandas_profiling
 
 
 # 1. Load Data
@@ -122,7 +123,7 @@ def split_df(n_clusters, data, model, name):
 
 # KMeans
 elbow(df_nor, KMeans, 'KMeans')
-df_all, km = split_df(5, df_nor, KMeans, 'KMeans')
+df_all, km = split_df(4, df_nor, KMeans, 'KMeans')
 
 # KMedoids
 # elbow(df_nor, KMeans, 'KMedoids')
@@ -130,7 +131,7 @@ df_all, km = split_df(5, df_nor, KMeans, 'KMeans')
 
 # Save df with label
 df.to_excel('/Users/mingyupark/spyder/plc_grad'+
-        '/data/output/통합kmeans.xlsx') # or kmedoids
+        '/data/output/통합kmeans_all.xlsx') # or kmedoids
 
 # 6. Make comparison dataframe
 numerical = ['장학금액', '학부평균성적', '직전2학기평균', '성적오름추세', '직전2학기증가율',
@@ -170,7 +171,7 @@ def comp(bina, nume, dfs, name):
 
     final_df.to_csv('/Users/mingyupark/spyder/plc_grad'+
             '/data/output/count_{0}_{1}.csv'.format(len(dfs) ,name), encoding='euc-kr')
-    numerical = ['학부평균성적', '직전2학기평균', '성적오름추세', '직전2학기증가율']
+    # numerical = ['학부평균성적', '직전2학기평균', '성적오름추세', '직전2학기증가율']
 
     final_df_n = pd.DataFrame()
     for nu in nume:
@@ -205,3 +206,21 @@ def visual_2d(data, n_clusters, name):
 
 visual_2d(df_nor, len(df_all), 'KMeans')
 # visual_2d(df_nor, len(df_all), 'KMedoids')
+
+
+# Pandas profiling
+new_df = pd.read_excel('/Users/mingyupark/spyder/plc_grad'+
+        '/data/output/통합kmeans_all.xlsx')
+
+print(new_df.dtypes)
+
+need_change = ['학부_편입여부', '학부_입학년도', '현장실습이수여부', '복수전공여부',
+       '부전공여부', '교환학생여부', '수도권_거주여부', '학습역량 여부', '진로,심리 여부',
+       '취업,진로 여부', '창업 여부', '비교과 여부', '휴학_기타', '휴학_군대', '대학원_입학연도']
+for i in need_change:
+    new_df[i] = new_df[i].astype('category')
+
+for j in range(5):
+    pr = new_df[new_df['km_5'] == j].profile_report()
+    pr.to_file('/Users/mingyupark/spyder/plc_grad'+
+        '/data/output/km_profile_{}.html'.format(j))
