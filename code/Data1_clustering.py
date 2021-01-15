@@ -31,12 +31,13 @@ df = df[['성별', '학부_편입여부', '현장실습이수여부', '복수전
          '진로,심리 여부', '취업,진로 여부', '창업 여부', '비교과 여부', '휴학_기타',
         '휴학_군대', '학부평균성적', '직전2학기평균', '성적오름추세', '직전2학기증가율',
         '학부입학 후 대학원입학까지 걸린 시간', '학부와 대학원 전공의 계열 일치 여부']]
+
 df['성별'] = df['성별'].astype('category')
 df = pd.get_dummies(df)
 df.drop(['성별_남자'], inplace=True, axis=1)
 
 # Exam score columns only
-# df = df[['학부평균성적', '직전2학기평균', '성적오름추세', '직전2학기증가율']]
+df = df[['학부평균성적', '직전2학기평균', '성적오름추세', '직전2학기증가율']]
 
 
 # 3. Nomalization
@@ -122,8 +123,8 @@ def split_df(n_clusters, data, model, name):
 
 
 # KMeans
-elbow(df_nor, KMeans, 'KMeans')
-df_all, km = split_df(4, df_nor, KMeans, 'KMeans')
+elbow(df_nor, KMeans, 'KMeans_score')
+df_all, km = split_df(5, df_nor, KMeans, 'KMeans_score')
 
 # KMedoids
 # elbow(df_nor, KMeans, 'KMedoids')
@@ -131,7 +132,7 @@ df_all, km = split_df(4, df_nor, KMeans, 'KMeans')
 
 # Save df with label
 df.to_excel('/Users/mingyupark/spyder/plc_grad'+
-        '/data/output/통합kmeans_all.xlsx') # or kmedoids
+        '/data/output/통합kmeans.xlsx') # or kmedoids
 
 # 6. Make comparison dataframe
 numerical = ['장학금액', '학부평균성적', '직전2학기평균', '성적오름추세', '직전2학기증가율',
@@ -189,9 +190,9 @@ def comp(bina, nume, dfs, name):
             '/data/output/numerical_{0}_{1}.csv'.format(len(dfs), name), encoding='euc-kr')
 
 
-
 comp(binary, numerical, df_all, 'KMeans')
 # comp(binary, numerical, df_all, 'KMedoids')
+
 
 
 # 7. Visualization using TSNE
