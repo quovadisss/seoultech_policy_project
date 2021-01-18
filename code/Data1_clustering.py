@@ -123,8 +123,8 @@ def split_df(n_clusters, data, model, name):
 
 
 # KMeans
-elbow(df_nor, KMeans, 'KMeans_score')
-df_all, km = split_df(5, df_nor, KMeans, 'KMeans_score')
+elbow(df_nor, KMeans, 'KMeans')
+df_all, km = split_df(5, df_nor, KMeans, 'KMeans')
 
 # KMedoids
 # elbow(df_nor, KMeans, 'KMedoids')
@@ -201,6 +201,7 @@ def visual_2d(data, n_clusters, name):
     transformed = tsne.fit_transform(data)
 
     plt.scatter(transformed[:,0], transformed[:,1], c=df['km_5'])
+    plt.legend()
     plt.savefig('/Users/mingyupark/spyder/seoultech_policy_project'+
             '/data/output/TSNE_{0}_{1}'.format(n_clusters, name))
 
