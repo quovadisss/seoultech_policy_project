@@ -5,6 +5,7 @@ import re
 import scipy.stats as stats
 from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
+from statsmodels.stats.oneway import anova_oneway
 
 # Load graduate and undergraduate data
 data_loc = '/Users/mingyupark/spyder/plc_grad/data/'
@@ -70,17 +71,58 @@ for i in df.columns:
 
 
 # ANOVA and Chi-square Test
-numerical = list(set(df.columns) - set(not_score_cols))
+numerical = sorted(list(set(df.columns) - set(not_score_cols)))
 categorical  = not_score_cols[1:]
 
 # ANOVA for numerical y variables
-result_df = pd.DataFrame()
+# Normality test
 for col in numerical:
-    model = ols('{} ~ C(indp_var)'.format(col), df).fit()
-    anova_df = anova_lm(model)
-    name = pd.DataFrame([col] + [' '] * 4).T
-    name.columns = anova_df.columns
-    result_df = pd.concat([result_df, name, anova_df], axis=0)
+    print(col)
+    print(stats.shapiro(df[df['indp_var']=='grad'][col]))
+    print(stats.shapiro(df[df['indp_var']=='wish'][col]))
+    print(stats.shapiro(df[df['indp_var']=='no_wish'][col]))
+
+
+from collections import Counter
+
+Counter(df[df['indp_var']=='grad']['전공분류'])
+# Equality of variance test
+# Levene test
+# Bartlett test
+noequal_var = []
+for col in numerical:
+    levene = stats.levene(
+        df[df['indp_var']=='grad'][col],
+        df[df['indp_var']=='wish'][col],
+        df[df['indp_var']=='no_wish'][col]
+    )
+    
+    bartlett = stats.bartlett(
+        df[df['indp_var']=='grad'][col],
+        df[df['indp_var']=='wish'][col],
+        df[df['indp_var']=='no_wish'][col]        
+    )
+    if not levene[1] > 0.05 or bartlett[1] > 0.05:
+        noequal_var.append(col)
+    else:
+        print(col)
+
+# Brown-Forsythe test for no equality of varience
+brown = []
+for col in noequal_var:
+    brown.append(
+        anova_oneway(
+        df[col], df['indp_var'],
+        use_var='bf'
+        ).pvalue2)
+no_equal_df = pd.DataFrame([noequal_var, brown]).T
+no_equal_df.to_csv(data_loc + 'no_equalANOVA.csv', encoding='cp949')
+
+
+# Only one column satisfy an equality of varience
+model = ols('교수수업만족 ~ C(indp_var)', df).fit()
+print(anova_lm(model))
+anova_lm(model).to_csv(data_loc + 'equl_교수수업만족anova.csv')
 
 # Chi-square for categorical y variables
 chi_score = []
@@ -96,5 +138,4 @@ chi_df = pd.DataFrame({'chi_score' : chi_score,
                        'p_value' : p_value,
                        'DF' : degree_f}, index=categorical)
 
-result_df.to_csv(data_loc + 'ANOVA_result0120.csv')
-chi_df.to_csv(data_loc + 'Chi_result0120.csv')
+chi_df.to_csv(data_loc + 'Chi_result0120.csv', encoding='cp949')
