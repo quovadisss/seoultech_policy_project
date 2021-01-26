@@ -1,11 +1,14 @@
+from itertools import combinations
 import pandas as pd
 import numpy as np
 import re
+
 
 import scipy.stats as stats
 from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
 from statsmodels.stats.oneway import anova_oneway
+from statsmodels.sandbox.stats.multicomp import MultiComparison
 
 # Load graduate and undergraduate data
 data_loc = '/Users/mingyupark/spyder/plc_grad/data/'
@@ -83,9 +86,6 @@ for col in numerical:
     print(stats.shapiro(df[df['indp_var']=='no_wish'][col]))
 
 
-from collections import Counter
-
-Counter(df[df['indp_var']=='grad']['전공분류'])
 # Equality of variance test
 # Levene test
 # Bartlett test
@@ -139,3 +139,40 @@ chi_df = pd.DataFrame({'chi_score' : chi_score,
                        'DF' : degree_f}, index=categorical)
 
 chi_df.to_csv(data_loc + 'Chi_result0120.csv', encoding='cp949')
+
+
+# Bonferroni post hoc for numerical
+bon_df = pd.DataFrame()
+num_cols = []
+for col in numerical:
+    comp = MultiComparison(df[col], df['indp_var'])
+    result = comp.allpairtest(stats.ttest_ind, method='bonf')
+    result_df = pd.DataFrame(result[2])
+    bon_df = pd.concat([bon_df, result_df])
+    num_cols.extend([col, ' ', ' '])
+
+bon_df['cols'] = num_cols
+bon_df = bon_df[[bon_df.columns.tolist()[-1]] + bon_df.columns.tolist()[:-1]]
+
+bon_df.to_csv(data_loc + 'Bon_result0126.csv', encoding='cp949')
+
+
+# Chi-square post hoc for categorical
+cat_combi = combinations(np.unique(df['indp_var']), 2)
+cols = []
+pairs = []
+chi_p_val = []
+for col in categorical:
+    cols.extend([col, ' ', ' '])
+    for i in np.unique(df['indp_var']):
+        combi_df = df[df['indp_var'] != i]
+        cross_df = pd.crosstab(combi_df[col], combi_df['indp_var'])
+        chi_vals = stats.chi2_contingency(observed=cross_df)
+        pairs.append(np.unique(combi_df['indp_var']))
+        chi_p_val.append(chi_vals[1])
+
+chi_post_df = pd.DataFrame({'cols' : cols, 
+                       'pairs' : pairs,
+                       'p_val' : chi_p_val})
+
+chi_post_df.to_csv(data_loc + 'chi_posthoc0126.csv', encoding='cp949')
