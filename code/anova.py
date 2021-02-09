@@ -1,13 +1,12 @@
-from itertools import combinations
 import pandas as pd
 import numpy as np
 import re
-
 import scipy.stats as stats
 from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
 from statsmodels.stats.oneway import anova_oneway
 from statsmodels.sandbox.stats.multicomp import MultiComparison
+from itertools import combinations
 
 # Load graduate and undergraduate data
 data_loc = '/Users/mingyupark/spyder/plc_grad/data/'

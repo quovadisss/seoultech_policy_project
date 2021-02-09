@@ -4,24 +4,24 @@ KMeans and KMedoids are used.
 Elbow and Silhouette techniques are used.
 TSNE are used for visulization.
 """
-
-
-# Modlues
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_samples, silhouette_score
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
-from matplotlib import cm
+import pandas_profiling
+
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_samples, silhouette_score
 from sklearn.preprocessing import MinMaxScaler
 from sklearn_extra.cluster import KMedoids
 from sklearn.manifold import TSNE
-import pandas_profiling
 
+
+# data location
+data_loc = '/Users/mingyupark/spyder/plc_grad/data/'
 
 # 1. Load Data
-df = pd.read_excel('~/spyder/plc_grad/data/통합전처리_210105.xls').iloc[:,1:]
+df = pd.read_excel(data_loc + '통합전처리_210105.xls').iloc[:,1:]
 
 
 # 2. Extract columns will be used
@@ -70,8 +70,7 @@ def elbow(X, model, name):
     plt.plot(range(1, 11), sse, marker='o')
     plt.xlabel('클러스터 개수', fontproperties=fontprop)
     plt.ylabel('SSE')
-    plt.savefig('/Users/mingyupark/spyder/seoultech_policy_project'+
-        '/data/output/elbow_{}.png'.format(name))
+    plt.savefig(data_loc + 'output/elbow_{}.png'.format(name))
     plt.show()
 
 
@@ -89,7 +88,7 @@ def silhouette(n_clusters, data, model, name):
         c_silhouette_vals = silhouette_vals[y_km == c]
         c_silhouette_vals.sort()
         y_ax_upper += len(c_silhouette_vals)
-        color = cm.jet(i/n_clusters)
+        color = plt.cm.jet(i/n_clusters)
         
         plt.barh(range(y_ax_lower, y_ax_upper), c_silhouette_vals, height=1.0,
                 edgecolor='none', color=color)
@@ -101,8 +100,7 @@ def silhouette(n_clusters, data, model, name):
     plt.yticks(yticks, cluster_labels+1)
     plt.ylabel('클러스터', fontproperties=fontprop)
     plt.xlabel('실루엣 계수', fontproperties=fontprop)
-    plt.savefig('/Users/mingyupark/spyder/seoultech_policy_project'+
-        '/data/output/slhtt_{0}_{1}.png'.format(n_clusters, name))
+    plt.savefig(data_loc + 'output/slhtt_{0}_{1}.png'.format(n_clusters, name))
     plt.show()
     
     return km
@@ -131,8 +129,7 @@ df_all, km = split_df(5, df_nor, KMeans, 'KMeans')
 # df_all, km = split_df(5, df_nor, KMedoids, 'KMedoids')
 
 # Save df with label
-df.to_excel('/Users/mingyupark/spyder/plc_grad'+
-        '/data/output/통합kmeans.xlsx') # or kmedoids
+df.to_excel(data_loc + 'output/통합kmeans.xlsx') # or kmedoids
 
 # 6. Make comparison dataframe
 numerical = ['장학금액', '학부평균성적', '직전2학기평균', '성적오름추세', '직전2학기증가율',
@@ -170,8 +167,8 @@ def comp(bina, nume, dfs, name):
 
         final_df = pd.concat([final_df, df_v_all], axis=0)
 
-    final_df.to_csv('/Users/mingyupark/spyder/plc_grad'+
-            '/data/output/count_{0}_{1}.csv'.format(len(dfs) ,name), encoding='euc-kr')
+    final_df.to_csv(data_loc + 'output/count_{0}_{1}.csv'.format(len(dfs) ,name)
+                    , encoding='euc-kr')
     # numerical = ['학부평균성적', '직전2학기평균', '성적오름추세', '직전2학기증가율']
 
     final_df_n = pd.DataFrame()
@@ -186,13 +183,12 @@ def comp(bina, nume, dfs, name):
         
         final_df_n = pd.concat([final_df_n, df_v_all])
 
-    final_df_n.to_csv('/Users/mingyupark/spyder/plc_grad'+
-            '/data/output/numerical_{0}_{1}.csv'.format(len(dfs), name), encoding='euc-kr')
+    final_df_n.to_csv(data_loc + 'output/numerical_{0}_{1}.csv'.format(len(dfs), name)
+                    , encoding='euc-kr')
 
 
 comp(binary, numerical, df_all, 'KMeans')
 # comp(binary, numerical, df_all, 'KMedoids')
-
 
 
 # 7. Visualization using TSNE
@@ -202,8 +198,7 @@ def visual_2d(data, n_clusters, name):
 
     plt.scatter(transformed[:,0], transformed[:,1], c=df['km_5'])
     plt.legend()
-    plt.savefig('/Users/mingyupark/spyder/seoultech_policy_project'+
-            '/data/output/TSNE_{0}_{1}'.format(n_clusters, name))
+    plt.savefig(data_loc + 'output/TSNE_{0}_{1}'.format(n_clusters, name))
 
 
 visual_2d(df_nor, len(df_all), 'KMeans')
@@ -211,10 +206,7 @@ visual_2d(df_nor, len(df_all), 'KMeans')
 
 
 # Pandas profiling
-new_df = pd.read_excel('/Users/mingyupark/spyder/plc_grad'+
-        '/data/output/통합kmeans_all.xlsx')
-
-print(new_df.dtypes)
+new_df = pd.read_excel(data_loc + 'output/통합kmeans_all.xlsx')
 
 need_change = ['학부_편입여부', '학부_입학년도', '현장실습이수여부', '복수전공여부',
        '부전공여부', '교환학생여부', '수도권_거주여부', '학습역량 여부', '진로,심리 여부',
@@ -224,5 +216,4 @@ for i in need_change:
 
 for j in range(5):
     pr = new_df[new_df['km_5'] == j].profile_report()
-    pr.to_file('/Users/mingyupark/spyder/plc_grad'+
-        '/data/output/km_profile_{}.html'.format(j))
+    pr.to_file(data_loc + 'output/km_profile_{}.html'.format(j))
