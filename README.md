@@ -21,9 +21,9 @@ The project will help university managers to have insights for promoting admissi
 - basic.py : run preprocessing
 - clustering.py : clustering analysis for data 1
 - anova.py : anova test for data 2
-- logistic_regression : supervised learning for data 2
+- logistic_regression.py : supervised learning for data 2
 
-### Alerts
+## Alerts
 - I uploaded only codes and some outputs like plots because all of the data is confidential.
 - This is team project, so there are missing analysis results and processes.
 
