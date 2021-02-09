@@ -89,48 +89,6 @@ new_df_2['성적오름추세'] = trend
 new_df_2.to_excel('학부성적_전처리_정리.xlsx')
 
 
-# -----------------------------------------------------------
-
-# 휴학
-# Load data
-df = pd.read_excel('휴학현황_일반대학원_본교.xls')
-
-rest = np.unique(df['휴학사유'])
-uniq_id_b = sorted(np.unique(df['학생통계번호']))
-
-arr = np.array(df[['휴학사유', '학생통계번호']])
-
-# Make new dataframe
-new_df = pd.DataFrame(0, columns=rest, index=uniq_id_b)
-for i in range(len(arr)):
-    r = arr[i][0]
-    s = int(arr[i][1])
-    new_df[r][s] += 1
-
-new_col = []
-for i in rest:
-    new_col.append('휴학사유_{}'.format(i))
-new_df.columns = new_col
-
-new_df.to_excel('휴학_전처리.xlsx')
-
-# 휴학 yes = 1, 군휴학 = 2, no = 0
-new_df = pd.read_excel('휴학_전처리.xlsx')
-new_df_ind = new_df['Unnamed: 0']
-new_df_2 = pd.DataFrame(0, columns=['휴학_기타', '휴학_군대'], index=new_df_ind)
-army = [2, 3, 7]
-arr_2 = np.array(new_df)
-for i in range(len(arr_2)):
-    for j in range(len(arr_2[0])):
-        if j in army:
-            if arr_2[i][j] != 0:
-                new_df_2['휴학_군대'][new_df_ind[i]] = 1
-        else:
-            if arr_2[i][j] != 0:
-                new_df_2['휴학_기타'][new_df_ind[i]] = 1
-
-
-new_df_2.to_excel('휴학_전처리_정리.xlsx')
 
 
 # ------------------------------------------------------------
@@ -151,46 +109,3 @@ for i, j in zip(df['대학'], df['대학원입학년']):
 
 Counter(depart)
 
-
-# ------------------------------------------------------------
-df = pd.read_excel('~/spyder/plc_grad/data/통합전처리_210101.xls')
-scores = np.array(df[['{}학기성적'.format(i) for i in range(1,13)]])
-scores_nonan = []
-for i in scores:
-    scores_nonan.append([j for j in i if not math.isnan(j)])
-
-# Calculate linear coefficient
-coeffi = []
-for y in scores_nonan:
-    x = np.arange(len(y)).reshape(-1, 1)
-    y = np.array(y).reshape(-1, 1)
-    reg = LinearRegression().fit(x, y)
-    coeffi.append(np.round(reg.coef_[0][0], 3))
-
-# Coefficient for latest 4 semester
-coeffi_4 = []
-for y in scores_nonan:
-    if len(y) > 3:
-        x = np.arange(4).reshape(-1, 1)
-        y = np.array(y[-4:]).reshape(-1, 1)
-    else:
-        x = np.arange(len(y)).reshape(-1, 1)
-        y = np.array(y).reshape(-1, 1)
-    reg = LinearRegression().fit(x, y)
-    coeffi_4.append(np.round(reg.coef_[0][0], 3))
-
-# Latest 2 semester
-sem_2 = []
-for e in scores_nonan:
-    if len(e) == 1:
-        sem_2.append(0)
-    else:
-        sem_2.append(np.round(e[-2:][0] / e[-2:][1] - 1, 3))
-
-# Merge all results
-df['성적기울기'] = coeffi
-df['성적기울기_직전4학기'] = coeffi_4
-df['직전2학기증가율'] = sem_2
-
-# Save the result
-df.to_excel('~/spyder/plc_grad/data/통합전처리_210101(2).xls')
