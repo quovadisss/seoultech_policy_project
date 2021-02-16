@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import statsmodels.api as sm
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
@@ -33,24 +34,36 @@ def logistic(table):
     # ce_dict = dict(zip(X_cols, np.round(np.abs(lasso.coef_[0]), 3)))
     ce_dict = dict(zip(X_cols, np.round(lasso.coef_[0], 3)))
     sort_ce = {k: v for k, v in sorted(ce_dict.items(), key=lambda x: np.abs(x[1]), reverse=True)}
+    exp_dict = dict(zip(X_cols, np.round(np.exp(np.abs(lasso.coef_[0])), 3)))
+    sort_exp = {k: v for k, v in sorted(exp_dict.items(), key=lambda x: x[1], reverse=True)}
 
-    return sort_ce
+    new_cols = ['x_{}'.format(i) for i in range(len(X_cols))]
+    print(new_cols)
+    table_ = pd.DataFrame(X, columns=new_cols)
+    table_['x_36'] = y
+    formula = 'x_36 ~ {}'.format(' + '.join(new_cols[:-1]))
+    model = sm.GLM.from_formula(formula, family=sm.families.Binomial(), data=table_)
+    result = model.fit()
+    pval_dict = dict(zip(X_cols, result.pvalues))
+    for i in sort_exp.keys():
+        print(i, np.round(pval_dict[i], 5))
+
+    return sort_ce, sort_exp
 
 
 # There are 3 times of analysis with 3 variable sets
 # Set 1. Using all variables
-set1_ce = logistic(df_all)
+set1_ce, set1_exp = logistic(df_all)
 
 # Set 2. Using important features
 set2_cols = ['취업시석사학력도움여부', '취업_영업직', '취업_기술직', '취업_연구직', '대학원에좋지않은인식',
  '분야대학원학위요구', '대학원안좋은인식_플젝업무', '교수진로상담', '석사진학계획', 'RA활동여부', '전공만족도',
  '대학원홍보물접한여부']
 set2_df = df_all[set2_cols]
-set2_ce = logistic(set2_df)
+set2_ce, set2_exp = logistic(set2_df)
 
 # Set 3. Using all variables except '분야대학원학위요구', '취업_{}'
 set3_cols = [i for i in df_all.columns if '취업_' not in i][1:]
 set3_df = df_all[set3_cols]
-set3_ce = logistic(set3_df)
-
+set3_ce, set3_exp = logistic(set3_df)
 
